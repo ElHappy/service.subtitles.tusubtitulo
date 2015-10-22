@@ -15,9 +15,9 @@
     <language>es en</language>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
-    <forum>http://forum.xbmc.org/showthread.php?tid=185685</forum>
-    <website></website>
+    <forum>http://forum.kodi.tv/showthread.php?tid=244883</forum>
+    <website>http://elhappy.net</website>
     <email></email>
-    <source>https://github.com/m0r3/service.subtitles.subtituloses</source> 
+    <source>https://github.com/ElHappy/service.subtitles.tusubtitulo</source> 
   </extension>
 </addon>
