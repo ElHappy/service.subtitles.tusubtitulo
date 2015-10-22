@@ -34,8 +34,6 @@ sys.path.append (__resource__)
 
 from TuSubUtilities import search_tvshow, log
 
-
-
 """ Called when searching for subtitles from XBMC """
 def Search(item):
 	subs = search_tvshow(item['tvshow'], item['season'], item['episode'], item['2let_language'], item['file_original_path'])
@@ -43,7 +41,7 @@ def Search(item):
 		append_subtitle(sub)
 
 def append_subtitle(item):
-  listitem = xbmcgui.ListItem(label=item['language_name'],  label2=item['filename'], iconImage=item['rating'], thumbnailImage=item['lang'])
+  listitem = xbmcgui.ListItem(label=item['language_name'], label2=item['filename'], iconImage=item['rating'], thumbnailImage=item['lang'])
 
   listitem.setProperty("sync",  'true' if item["sync"] else 'false')
   listitem.setProperty("hearing_imp", 'true' if item["hearing_imp"] else 'false')
@@ -182,6 +180,5 @@ elif params['action'] == 'download':
   for sub in subs:
     listitem = xbmcgui.ListItem(label=sub)
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=sub,listitem=listitem,isFolder=False)
-  
   
 xbmcplugin.endOfDirectory(int(sys.argv[1])) ## send end of directory to XBMC

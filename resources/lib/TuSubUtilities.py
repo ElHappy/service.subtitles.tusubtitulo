@@ -14,7 +14,7 @@ subtitle_pattern1 = "<div id=\"version\" class=\"ssdiv\">(.+?)Versi&oacute;n(.+?
 subtitle_pattern2 = "<li class='li-idioma'>(.+?)<strong>(.+?)</strong>(.+?)<li class='li-estado (.+?)</li>(.+?)<li class='descargar (.+?)</li>"
 
 def log(module, msg):
-	xbmc.log((u"### [%s] - %s" % (module,msg,)).encode('utf-8'), level=xbmc.LOGDEBUG)
+	xbmc.log((u"### [%s] - %s" % (module,msg)).encode('utf-8'), level=xbmc.LOGDEBUG)
 
 def search_tvshow(tvshow, season, episode, languages, filename):
 	subs = list()
@@ -22,11 +22,11 @@ def search_tvshow(tvshow, season, episode, languages, filename):
 		searchstring, ttvshow, sseason, eepisode = getsearchstring(tvshow, season, episode, level)
 		url = main_url + searchstring.lower()
 		subs.extend(getallsubsforurl(url, languages, None, ttvshow, sseason, eepisode, level))
-		
+
 	subs = clean_subtitles_list(subs)
 	subs = order_subtitles_list(subs)
 	return subs
-		
+
 def getsearchstring(tvshow, season, episode, level):
 
 	# Clean tv show name
@@ -59,6 +59,7 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
 
 	content = geturl(url)
 
+	# Search list of subtitles
 	for matches in re.finditer(subtitle_pattern1, content, re.IGNORECASE | re.DOTALL | re.MULTILINE | re.UNICODE):
 
 		filename = urllib.unquote_plus(matches.group(2))
@@ -69,8 +70,10 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
 		backup = filename
 		subs = matches.group(4)
 
+		# Search content of every subtitle
 		for matches in re.finditer(subtitle_pattern2, subs, re.IGNORECASE | re.DOTALL | re.MULTILINE | re.UNICODE):
 
+			# Take language of subtitle
 			lang = matches.group(2)
 			lang = re.sub(r'\xc3\xb1', 'n', lang)
 			lang = re.sub(r'\xc3\xa0', 'a', lang)
@@ -90,24 +93,26 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
 				server = filename
 				order = 1 + languages[lang][3]
 
-			estado = matches.group(4)
-			estado = re.sub(r'\t', '', estado)
-			estado = re.sub(r'\n', '', estado)
+			# Take state of subtitle
+			state = matches.group(4)
+			state = re.sub(r'\t', '', state)
+			state = re.sub(r'\n', '', state)
 
-			id = matches.group(6)
-			id = re.sub(r'([^-]*)href="', '', id)
-			id = re.sub(r'" rel([^-]*)', '', id)
-			id = re.sub(r'" re([^-]*)', '', id)
-			id = re.sub(r'">([^-]*)', '', id)
+			# Take link of subtitle
+			link = matches.group(6)
+			link = re.sub(r'([^-]*)href="', '', link)
+			link = re.sub(r'" rel([^-]*)', '', link)
+			link = re.sub(r'" re([^-]*)', '', link)
+			link = re.sub(r'">([^-]*)', '', link)
 
-			if estado.strip() == "green'>Completado".strip() and languageshort in langs:
-				subtitles_list.append({'rating': "0", 'no_files': 1, 'filename': filename, 'server': server, 'sync': False, 'language_flag': languageshort + '.gif', 'language_name': languagelong, 'hearing_imp': False, 'link': id, 'lang': languageshort, 'order': order})
+			# Just add complete subtitles
+			if state.strip() == "green'>Completado".strip() and languageshort in langs:
+				subtitles_list.append({'rating': "0", 'no_files': 1, 'filename': filename, 'server': server, 'sync': False, 'language_flag': languageshort + '.gif', 'language_name': languagelong, 'hearing_imp': False, 'link': link, 'lang': languageshort, 'order': order})
 
 			filename = backup
 			server = backup
-			    
-	return subtitles_list
 
+	return subtitles_list
 
 def geturl(url):
 	class AppURLopener(urllib.FancyURLopener):
@@ -128,22 +133,14 @@ def geturl(url):
 	return content
 
 def clean_subtitles_list(subtitles_list):
-    seen = set()
-    subs = []
-    for sub in subtitles_list:
-        filename = sub['link']
-        #log(__name__, "Filename: %s" % filename)
-        if filename not in seen:
-            subs.append(sub)
-            seen.add(filename)
-    return subs
+  seen = set()
+  subs = []
+  for sub in subtitles_list:
+    filename = sub['link']
+    if filename not in seen:
+      subs.append(sub)
+      seen.add(filename)
+  return subs
 
 def order_subtitles_list(subtitles_list):
 	return sorted(subtitles_list, key=itemgetter('order')) 
-	
-"""
-if __name__ == "__main__":
-	subs = search_tvshow("les revenants", "1", "1", "es,en,fr", None)
-	for sub in subs: print sub['server'], sub['link']
-"""
-
