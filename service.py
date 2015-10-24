@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 
 """
-This addon is a modification of m0r3's addon for Subtitulos.es, adapted to TuSubtitulo.com
+This addon is a modification of m0r3's addon for Subtitulos.es, adapted to TuSubtitulo
 
 Original code by m0re (https://github.com/m0r3)
 """

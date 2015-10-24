@@ -1,3 +1,3 @@
 service.subtitles.tusubtitulo
 ==============================
-TuSubtitulo subtitle service plugin for XBMC
+TuSubtitulo Unofficial subtitle service plugin for XBMC

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # based on subtitulos.es subtitles
-# developed by El_Happy for TuSubtitulo.com and XBMC.org
+# developed by El_Happy for use TuSubtitulo (unofficially) and XBMC.org
 
 import xbmc
 import re
