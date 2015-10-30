@@ -10,7 +10,8 @@ import urllib
 from operator import itemgetter
 from utils import languages, alternatives
 
-settings = xbmcaddon.Addon(id='service.subtitles.tusubtitulo')
+__scriptid__ = xbmcaddon.Addon().getAddonInfo('id')
+settings = xbmcaddon.Addon(id=__scriptid__)
 
 main_url = "http://www.tusubtitulo.com/"
 subtitle_pattern1 = "<div id=\"version\" class=\"ssdiv\">(.+?)Versi&oacute;n(.+?)<span class=\"right traduccion\">(.+?)</div>(.+?)</div>"
@@ -74,6 +75,8 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
 		filename = urllib.unquote_plus(matches.group(2))
 		filename = re.sub(r' ', '.', filename)
 		filename = re.sub(r'\s', '.', tvshow) + "." + season + "x" + episode + filename
+		filename = re.sub(r'..0.00.megabytes', '', filename)
+		filename = re.sub(r'.0.00.megabytes', '', filename)
 
 		server = filename
 		backup = filename
@@ -125,7 +128,7 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
 
 def geturl(url):
 	class AppURLopener(urllib.FancyURLopener):
-		version = "App/1.7"
+		version = "User-Agent=Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1"
 		def __init__(self, *args):
 			urllib.FancyURLopener.__init__(self, *args)
 		def add_referrer(self, url=None):
