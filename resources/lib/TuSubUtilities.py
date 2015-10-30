@@ -7,7 +7,7 @@ import xbmc
 import re
 import urllib
 from operator import itemgetter
-from utils import languages
+from utils import languages, alternatives
 
 main_url = "http://www.tusubtitulo.com/"
 subtitle_pattern1 = "<div id=\"version\" class=\"ssdiv\">(.+?)Versi&oacute;n(.+?)<span class=\"right traduccion\">(.+?)</div>(.+?)</div>"
@@ -18,7 +18,7 @@ def log(module, msg):
 
 def search_tvshow(tvshow, season, episode, languages, filename):
 	subs = list()
-	for level in range(4):
+	for level in range(5):
 		searchstring, ttvshow, sseason, eepisode = getsearchstring(tvshow, season, episode, level)
 		url = main_url + searchstring.lower()
 		subs.extend(getallsubsforurl(url, languages, None, ttvshow, sseason, eepisode, level))
@@ -41,6 +41,12 @@ def getsearchstring(tvshow, season, episode, level):
 	if level == 3 and re.search(r'\([^)]*\)', tvshow):
 	    # Series name like "Shameless (*)" -> "Shameless"
 	    tvshow = re.sub(r'\s\([^)]*\)', '', tvshow)
+
+	if level == 4 and re.search(r'\([^)]*\)', tvshow):
+			# Clean name like "Serie (*)" -> "Serie"
+			tvshow = re.sub(r'\s\([^)]*\)', '', tvshow)
+			# Search alternative name "Serie" -> "Serie 2014"
+			tvshow = alternatives[tvshow] if tvshow in alternatives else tvshow
 
 	# Build search string
 	searchstring = 'serie/' + tvshow + '/' + season + '/' + episode + '/*'
