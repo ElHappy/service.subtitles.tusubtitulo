@@ -4,10 +4,13 @@
 # developed by El_Happy for use TuSubtitulo (unofficially) and XBMC.org
 
 import xbmc
+import xbmcaddon
 import re
 import urllib
 from operator import itemgetter
 from utils import languages, alternatives
+
+settings = xbmcaddon.Addon(id='service.subtitles.tusubtitulo')
 
 main_url = "http://www.tusubtitulo.com/"
 subtitle_pattern1 = "<div id=\"version\" class=\"ssdiv\">(.+?)Versi&oacute;n(.+?)<span class=\"right traduccion\">(.+?)</div>(.+?)</div>"
@@ -42,7 +45,7 @@ def getsearchstring(tvshow, season, episode, level):
 	    # Series name like "Shameless (*)" -> "Shameless"
 	    tvshow = re.sub(r'\s\([^)]*\)', '', tvshow)
 
-	if level == 4 and re.search(r'\([^)]*\)', tvshow):
+	if level == 4:
 			# Clean name like "Serie (*)" -> "Serie"
 			tvshow = re.sub(r'\s\([^)]*\)', '', tvshow)
 			# Search alternative name "Serie" -> "Serie 2014"
@@ -129,7 +132,11 @@ def geturl(url):
 			if url:
 				urllib._urlopener.addheader('Referer', url)
 
-	urllib._urlopener = AppURLopener()
+	if settings.getSetting('PROXY'):
+		proxy = {settings.getSetting('PROXY_PROTOCOL') : settings.getSetting('PROXY_PROTOCOL') + '://' + settings.getSetting('PROXY_HOST') + ':' + settings.getSetting('PROXY_PORT')}
+		urllib._urlopener = AppURLopener(proxy)
+	else:
+		urllib._urlopener = AppURLopener()
 	urllib._urlopener.add_referrer("http://www.tusubtitulo.com/")
 	try:
 		response = urllib._urlopener.open(url)
