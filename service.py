@@ -59,11 +59,11 @@ def Download(link, filename):
     log(__name__, "Downloadlink %s" % link)
 
     class MyOpener(urllib.FancyURLopener):
-      version = "User-Agent=Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1"
+      version = "User-Agent=Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36"
       def __init__(self, *args):
         urllib.FancyURLopener.__init__(self, *args)
 
-    if settings.getSetting('PROXY'):
+    if settings.getSetting('PROXY') == 'true':
       proxy = {settings.getSetting('PROXY_PROTOCOL') : settings.getSetting('PROXY_PROTOCOL') + '://' + settings.getSetting('PROXY_HOST') + ':' + settings.getSetting('PROXY_PORT')}
       my_urlopener = MyOpener(proxy)
     else:

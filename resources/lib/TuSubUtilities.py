@@ -138,10 +138,12 @@ def geturl(url):
 			if url:
 				urllib._urlopener.addheader('Referer', url)
 
-	if settings.getSetting('PROXY') == True:
+	if settings.getSetting('PROXY') == 'true':
+		print 'usa proxy'
 		proxy = {settings.getSetting('PROXY_PROTOCOL') : settings.getSetting('PROXY_PROTOCOL') + '://' + settings.getSetting('PROXY_HOST') + ':' + settings.getSetting('PROXY_PORT')}
 		urllib._urlopener = AppURLopener(proxy)
 	else:
+		print 'no usa proxy'
 		urllib._urlopener = AppURLopener()
 	urllib._urlopener.add_referrer("http://www.tusubtitulo.com/")
 	try:
