@@ -14,8 +14,8 @@ __scriptid__ = xbmcaddon.Addon().getAddonInfo('id')
 settings = xbmcaddon.Addon(id=__scriptid__)
 
 main_url = "http://www.tusubtitulo.com/"
-subtitle_pattern1 = "<div id=\"version\" class=\"ssdiv\">(.+?)Versi&oacute;n(.+?)<span class=\"right traduccion\">(.+?)</div>(.+?)</div>"
-subtitle_pattern2 = "<li class='li-idioma'>(.+?)<strong>(.+?)</strong>(.+?)<li class='li-estado (.+?)</li>(.+?)<li class='descargar (.+?)</li>"
+subtitle_pattern1 = "<div id='version(\d+)' class='ssdiv'>(.+?)Versión(.+?)<span class='right traduccion'>(.+?)</div>(.+?)</div>"
+subtitle_pattern2 = "<li class='li-idioma'>(.+?)<b>(.+?)</b>(.+?)<li class='li-estado (.+?)</li>(.+?)<li class='descargar (.+?)</li>"
 
 def log(module, msg):
 	xbmc.log((u"### [%s] - %s" % (module,msg)).encode('utf-8'), level=xbmc.LOGDEBUG)
@@ -68,66 +68,68 @@ def getsearchstring(tvshow, season, episode, level):
 
 def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, level):
 
-	subtitles_list = []
+  subtitles_list = []
 
-	content = geturl(url)
+  content = geturl(url)
 
-	# Search list of subtitles
-	for matches in re.finditer(subtitle_pattern1, content, re.IGNORECASE | re.DOTALL | re.MULTILINE | re.UNICODE):
+  # Search list of subtitles
+  for matches in re.finditer(subtitle_pattern1, content, re.IGNORECASE | re.DOTALL | re.MULTILINE | re.UNICODE):
 
-		filename = urllib.unquote_plus(matches.group(2))
-		filename = re.sub(r' ', '.', filename)
-		filename = re.sub(r'\s', '.', tvshow) + "." + season + "x" + episode + filename
-		filename = re.sub(r'..0.00.megabytes', '', filename)
-		filename = re.sub(r'.0.00.megabytes', '', filename)
+    filename = urllib.unquote_plus(matches.group(3))
+    filename = re.sub(r' ', '.', filename)
+    filename = re.sub(r'\s', '.', tvshow) + "." + season + "x" + episode + filename
+    filename = re.sub(r'..0.00.megabytes', '', filename)
+    filename = re.sub(r'.0.00.megabytes', '', filename)
 
-		server = filename
-		backup = filename
-		subs = matches.group(4)
+    server = filename
+    backup = filename
+    subs = matches.group(5)
 
-		# Search content of every subtitle
-		for matches in re.finditer(subtitle_pattern2, subs, re.IGNORECASE | re.DOTALL | re.MULTILINE | re.UNICODE):
+    # Search content of every subtitle
+    for matches in re.finditer(subtitle_pattern2, subs, re.IGNORECASE | re.DOTALL | re.MULTILINE | re.UNICODE):
 
-			# Take language of subtitle
-			lang = matches.group(2)
-			lang = re.sub(r'\xc3\xb1', 'n', lang)
-			lang = re.sub(r'\xc3\xa0', 'a', lang)
-			lang = re.sub(r'\xc3\xa9', 'e', lang)
+      # Take language of subtitle
+      lang = matches.group(2)
+      lang = re.sub(r'\xc3\xb1', 'n', lang)
+      lang = re.sub(r'\xc3\xa0', 'a', lang)
+      lang = re.sub(r'\xc3\xa9', 'e', lang)
 
-			if lang in languages:
-				languageshort = languages[lang][1]
-				languagelong = languages[lang][0]
-				filename = filename + ".(%s)" % languages[lang][2]
-				server = filename
-				order = 1 + languages[lang][3]
-			else:
-				lang = "Unknown"
-				languageshort = languages[lang][1]
-				languagelong = languages[lang][0]
-				filename = filename + ".(%s)" % languages[lang][2]
-				server = filename
-				order = 1 + languages[lang][3]
+      if lang in languages:
+        languageshort = languages[lang][1]
+        languagelong = languages[lang][0]
+        filename = filename + ".(%s)" % languages[lang][2]
+        server = filename
+        order = 1 + languages[lang][3]
+      else:
+        lang = "Unknown"
+        languageshort = languages[lang][1]
+        languagelong = languages[lang][0]
+        filename = filename + ".(%s)" % languages[lang][2]
+        server = filename
+        order = 1 + languages[lang][3]
 
-			# Take state of subtitle
-			state = matches.group(4)
-			state = re.sub(r'\t', '', state)
-			state = re.sub(r'\n', '', state)
+      # Take state of subtitle
+      state = matches.group(4)
+      state = re.sub(r'\t', '', state)
+      state = re.sub(r'\n', '', state)
+      state = re.sub(r' ', '', state)
 
-			# Take link of subtitle
-			link = matches.group(6)
-			link = re.sub(r'([^-]*)href="', '', link)
-			link = re.sub(r'" rel([^-]*)', '', link)
-			link = re.sub(r'" re([^-]*)', '', link)
-			link = re.sub(r'">([^-]*)', '', link)
+      # Take link of subtitle
+      link = matches.group(6)
+      link = re.sub(r'([^-]*)href="', '', link)
+      link = re.sub(r'" rel([^-]*)', '', link)
+      link = re.sub(r'" re([^-]*)', '', link)
+      link = re.sub(r'">([^-]*)', '', link)
+      link = "http://www.tusubtitulo.com/" + link
 
-			# Just add complete subtitles
-			if state.strip() == "green'>Completado".strip() and languageshort in langs:
-				subtitles_list.append({'rating': "0", 'no_files': 1, 'filename': filename, 'server': server, 'sync': False, 'language_flag': languageshort + '.gif', 'language_name': languagelong, 'hearing_imp': False, 'link': link, 'lang': languageshort, 'order': order})
+      # Just add complete subtitles
+      if state.strip() == "green'>Completado".strip() and languageshort in langs:
+        subtitles_list.append({'no_files': 1, 'filename': filename, 'server': server, 'sync': False, 'language_flag': languageshort + '.gif', 'language_name': languagelong, 'hearing_imp': False, 'link': link, 'lang': languageshort, 'order': order})
 
-			filename = backup
-			server = backup
+      filename = backup
+      server = backup
 
-	return subtitles_list
+  return subtitles_list
 
 def geturl(url):
 	class AppURLopener(urllib.FancyURLopener):
@@ -139,11 +141,11 @@ def geturl(url):
 				urllib._urlopener.addheader('Referer', url)
 
 	if settings.getSetting('PROXY') == 'true':
-		print 'usa proxy'
+		log("PROXY", "Proxy enabled")
 		proxy = {settings.getSetting('PROXY_PROTOCOL') : settings.getSetting('PROXY_PROTOCOL') + '://' + settings.getSetting('PROXY_HOST') + ':' + settings.getSetting('PROXY_PORT')}
 		urllib._urlopener = AppURLopener(proxy)
 	else:
-		print 'no usa proxy'
+		log("PROXY", "Proxy disabled")
 		urllib._urlopener = AppURLopener()
 	urllib._urlopener.add_referrer("http://www.tusubtitulo.com/")
 	try:

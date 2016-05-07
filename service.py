@@ -38,7 +38,7 @@ def Search(item):
     append_subtitle(sub)
 
 def append_subtitle(item):
-  listitem = xbmcgui.ListItem(label=item['language_name'], label2=item['filename'], iconImage=item['rating'], thumbnailImage=item['lang'])
+  listitem = xbmcgui.ListItem(label=item['language_name'], label2=item['filename'], thumbnailImage=item['lang'])
 
   listitem.setProperty("sync",  'true' if item["sync"] else 'false')
   listitem.setProperty("hearing_imp", 'true' if item["hearing_imp"] else 'false')
