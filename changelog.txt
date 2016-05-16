@@ -1,3 +1,6 @@
+1.0.5
+- Fixed search on the site
+- Fixed download subtitles
 1.0.4
 - Fixed search on the site
 - Fixed download subtitles
