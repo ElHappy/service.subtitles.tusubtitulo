@@ -118,7 +118,9 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
       state = re.sub(r' ', '', state)
 
       # Take link of subtitle
-      link = matches.group(7)
+      link = matches.group(6)
+      if link == 'download':
+        link = matches.group(7)
       link = re.sub(r'([^-]*)href="', '', link)
       link = re.sub(r'" rel([^-]*)', '', link)
       link = re.sub(r'" re([^-]*)', '', link)
