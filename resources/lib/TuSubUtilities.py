@@ -15,7 +15,7 @@ settings = xbmcaddon.Addon(id=__scriptid__)
 
 main_url = "http://www.tusubtitulo.com/"
 subtitle_pattern1 = "<div id='version(\d+)' class='ssdiv'>(.+?)Versión(.+?)<span class='right traduccion'>(.+?)</div>(.+?)</div>"
-subtitle_pattern2 = "<li class='li-idioma'>(.+?)<b>(.+?)</b>(.+?)<li class='li-estado (.+?)</li>(.+?)<li class='(descargar|download) (.+?)</li>"
+subtitle_pattern2 = "<li class='li-idioma'>(.+?)<b>(.+?)</b>(.+?)<li class='li-estado (.+?)</li>(.+?)<li class='(descargar|download|subdown) (.+?)</li>"
 
 def log(module, msg):
   xbmc.log((u"### [%s] - %s" % (module,msg)).encode('utf-8'), level=xbmc.LOGDEBUG)
@@ -119,7 +119,7 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
 
       # Take link of subtitle
       link = matches.group(6)
-      if link == 'download':
+      if link == 'descargar' or link == 'download' or link == 'subdown':
         link = matches.group(7)
       link = re.sub(r'([^-]*)href="', '', link)
       link = re.sub(r'" rel([^-]*)', '', link)
