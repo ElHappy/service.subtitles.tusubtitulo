@@ -59,7 +59,7 @@ def Download(link, filename):
     log(__name__, "Downloadlink %s" % link)
 
     class MyOpener(urllib.FancyURLopener):
-      version = "User-Agent=Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36"
+      version = "User-Agent=Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36"
       def __init__(self, *args):
         urllib.FancyURLopener.__init__(self, *args)
 

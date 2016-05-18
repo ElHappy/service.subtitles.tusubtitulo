@@ -9,13 +9,12 @@ import re
 import urllib
 from operator import itemgetter
 from utils import languages, alternatives
+from bs4 import BeautifulSoup
 
 __scriptid__ = xbmcaddon.Addon().getAddonInfo('id')
 settings = xbmcaddon.Addon(id=__scriptid__)
 
 main_url = "http://www.tusubtitulo.com/"
-subtitle_pattern1 = "<div id='version(\d+)' class='ssdiv'>(.+?)Versión(.+?)<span class='right traduccion'>(.+?)</div>(.+?)</div>"
-subtitle_pattern2 = "<li class='li-idioma'>(.+?)<b>(.+?)</b>(.+?)<li class='li-estado (.+?)</li>(.+?)<li class='(descargar|download|subdown) (.+?)</li>"
 
 def log(module, msg):
   xbmc.log((u"### [%s] - %s" % (module,msg)).encode('utf-8'), level=xbmc.LOGDEBUG)
@@ -72,73 +71,73 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
   subtitles_list = []
 
   content = geturl(url)
+  soup = BeautifulSoup(content, 'html.parser')
 
   # Search list of subtitles
-  for matches in re.finditer(subtitle_pattern1, content, re.IGNORECASE | re.DOTALL | re.MULTILINE | re.UNICODE):
+  for f in soup.find_all(text=re.compile(u'Versión')):
+    filename = f.strip()
+    if filename != None:
+      filename = re.sub(u'Versión', '', filename.strip())
+      filename = re.sub(r' ', '.', filename)
+      filename = re.sub(r'\s', '.', tvshow) + "." + season + "x" + episode + filename
+      filename = re.sub(r'..0.00.megabytes', '', filename)
+      filename = re.sub(r'.0.00.megabytes', '', filename)
+      filename = re.sub(r', 0.00 megabytes', '', filename)
+      server = filename
+      backup = filename
+      log("FILENAME", filename)
 
-    filename = urllib.unquote_plus(matches.group(3))
-    filename = re.sub(r' ', '.', filename)
-    filename = re.sub(r'\s', '.', tvshow) + "." + season + "x" + episode + filename
-    filename = re.sub(r'..0.00.megabytes', '', filename)
-    filename = re.sub(r'.0.00.megabytes', '', filename)
-    filename = re.sub(r', 0.00 megabytes', '', filename)
+      # Search content of every subtitle
+      for l in f.parent.parent.parent.parent.find_all('li'):
+        
+        # Take language of subtitle
+        if l.find('b') != None:
+          lang = re.sub(u'ñ', 'n', l.find('b').text.strip())
+          lang = re.sub(u'á', 'a', lang)
+          lang = re.sub(u'é', 'e', lang)
+          lang = re.sub(u'à', 'a', lang)
+          log("LANG", lang)
 
-    server = filename
-    backup = filename
-    subs = matches.group(5)
+          if lang in languages:
+            languageshort = languages[lang][1]
+            languagelong = languages[lang][0]
+            filename = filename + ".(%s)" % languages[lang][2]
+            server = filename
+            order = 1 + languages[lang][3]
+          else:
+            lang = "Unknown"
+            languageshort = languages[lang][1]
+            languagelong = languages[lang][0]
+            filename = filename + ".(%s)" % languages[lang][2]
+            server = filename
+            order = 1 + languages[lang][3]
+          continue
 
-    # Search content of every subtitle
-    for matches in re.finditer(subtitle_pattern2, subs, re.IGNORECASE | re.DOTALL | re.MULTILINE | re.UNICODE):
+        # Take state of subtitle
+        if l.text.strip() == 'Completado':
+          state = l.text.strip()
+          log("STATE", state)
+          continue
 
-      # Take language of subtitle
-      lang = matches.group(2)
-      lang = re.sub(r'\xc3\xb1', 'n', lang)
-      lang = re.sub(r'\xc3\xa0', 'a', lang)
-      lang = re.sub(r'\xc3\xa9', 'e', lang)
-      lang = re.sub(r'\xc3\xa1', 'a', lang)
+        # Take link of subtitle
+        if l.find('a') != None:
+          link = "http://www.tusubtitulo.com/" + l.find('a').get('href')
+          log("LINK", link)
 
-      if lang in languages:
-        languageshort = languages[lang][1]
-        languagelong = languages[lang][0]
-        filename = filename + ".(%s)" % languages[lang][2]
-        server = filename
-        order = 1 + languages[lang][3]
-      else:
-        lang = "Unknown"
-        languageshort = languages[lang][1]
-        languagelong = languages[lang][0]
-        filename = filename + ".(%s)" % languages[lang][2]
-        server = filename
-        order = 1 + languages[lang][3]
-
-      # Take state of subtitle
-      state = matches.group(4)
-      state = re.sub(r'\t', '', state)
-      state = re.sub(r'\n', '', state)
-      state = re.sub(r' ', '', state)
-
-      # Take link of subtitle
-      link = matches.group(6)
-      if link == 'descargar' or link == 'download' or link == 'subdown':
-        link = matches.group(7)
-      link = re.sub(r'([^-]*)href="', '', link)
-      link = re.sub(r'" rel([^-]*)', '', link)
-      link = re.sub(r'" re([^-]*)', '', link)
-      link = re.sub(r'">([^-]*)', '', link)
-      link = "http://www.tusubtitulo.com/" + link
-
-      # Just add complete subtitles
-      if state.strip() == "green'>Completado".strip() and languageshort in langs:
-        subtitles_list.append({'no_files': 1, 'filename': filename, 'server': server, 'sync': False, 'language_flag': languageshort + '.gif', 'language_name': languagelong, 'hearing_imp': False, 'link': link, 'lang': languageshort, 'order': order})
-
-      filename = backup
-      server = backup
+        # Just add complete subtitles
+        if lang != None and state != None and link != None and languageshort in langs:
+          subtitles_list.append({'no_files': 1, 'filename': filename, 'server': server, 'sync': False, 'language_flag': languageshort + '.gif', 'language_name': languagelong, 'hearing_imp': False, 'link': link, 'lang': languageshort, 'order': order})
+          lang = None
+          state = None
+          link = None
+          filename = backup
+          server = backup
 
   return subtitles_list
 
 def geturl(url):
   class AppURLopener(urllib.FancyURLopener):
-    version = "User-Agent=Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36"
+    version = "User-Agent=Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36"
     def __init__(self, *args):
       urllib.FancyURLopener.__init__(self, *args)
     def add_referrer(self, url=None):

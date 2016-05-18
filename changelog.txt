@@ -1,3 +1,5 @@
+1.0.7
+- Change way to search subtitles
 1.0.6
 - Added new parameter for search
 1.0.5
