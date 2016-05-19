@@ -11,5 +11,6 @@ languages = {
 
 alternatives = {
   "The Flash": "The Flash 2014",
-  "Lucifer": "Lucifer (2015)"
+  "Lucifer": "Lucifer (2015)",
+  "Twelve Monkeys": "12 Monkeys"
 }

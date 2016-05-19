@@ -1,3 +1,5 @@
+1.0.8
+- Fixed search on the site
 1.0.7
 - Change way to search subtitles
 1.0.6

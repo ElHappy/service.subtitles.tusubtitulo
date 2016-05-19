@@ -88,10 +88,13 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
       log("FILENAME", filename)
 
       # Search content of every subtitle
+      lang = None
+      state = None
+      link = None
       for l in f.parent.parent.parent.parent.find_all('li'):
         
         # Take language of subtitle
-        if l.find('b') != None:
+        if l.find('b') != None and lang == None:
           lang = re.sub(u'ñ', 'n', l.find('b').text.strip())
           lang = re.sub(u'á', 'a', lang)
           lang = re.sub(u'é', 'e', lang)
@@ -114,14 +117,14 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
           continue
 
         # Take state of subtitle
-        if l.text.strip() == 'Completado':
+        if l.text.strip() == 'Completado' and state == None:
           state = l.text.strip()
           log("STATE", state)
           continue
 
         # Take link of subtitle
-        if l.find('a') != None:
-          link = "http://www.tusubtitulo.com/" + l.find('a').get('href')
+        if l.find('a') != None and link == None:
+          link = main_url + l.find('a').get('href')
           log("LINK", link)
 
         # Just add complete subtitles
@@ -151,7 +154,7 @@ def geturl(url):
   else:
     log("PROXY", "Proxy disabled")
     urllib._urlopener = AppURLopener()
-  urllib._urlopener.add_referrer("http://www.tusubtitulo.com/")
+  urllib._urlopener.add_referrer(main_url)
   try:
     response = urllib._urlopener.open(url)
     content = response.read()
