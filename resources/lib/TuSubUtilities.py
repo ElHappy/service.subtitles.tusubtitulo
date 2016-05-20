@@ -123,8 +123,8 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
           continue
 
         # Take link of subtitle
-        if l.find('a') != None and link == None:
-          link = main_url + l.find('a').get('href')
+        if l.find('a', href=clear) != None and link == None:
+          link = main_url + l.find('a', href=clear).get('href')
           log("LINK", link)
 
         # Just add complete subtitles
@@ -174,3 +174,6 @@ def clean_subtitles_list(subtitles_list):
 
 def order_subtitles_list(subtitles_list):
   return sorted(subtitles_list, key=itemgetter('order')) 
+
+def clear(href):
+  return href and not re.compile('#').search(href)
