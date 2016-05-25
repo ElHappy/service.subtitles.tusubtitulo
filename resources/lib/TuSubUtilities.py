@@ -173,4 +173,4 @@ def clean_subtitles_list(subtitles_list):
   return subs
 
 def order_subtitles_list(subtitles_list):
-  return sorted(subtitles_list, key=itemgetter('order')) 
+  return sorted(subtitles_list, key=itemgetter('order'))
