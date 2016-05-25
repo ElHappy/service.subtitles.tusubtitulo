@@ -123,8 +123,8 @@ def getallsubsforurl(url, langs, file_original_path, tvshow, season, episode, le
           continue
 
         # Take link of subtitle
-        if l.find('a') != None and link == None:
-          link = main_url + l.find('a').get('href')
+        if l.find('a', href=re.compile(r'\w+\/\d+\/\d+')) != None and link == None:
+          link = main_url + l.find('a', href=re.compile(r'\w+\/\d+\/\d+')).get('href')
           log("LINK", link)
 
         # Just add complete subtitles
